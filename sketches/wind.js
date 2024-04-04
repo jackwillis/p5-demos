@@ -44,7 +44,7 @@ function draw() {
 
   for (let x = 0; x < figures.length; x += xSpacing) {
     for (let y = 0; y < figures[x].length; y += ySpacing) {
-      let figure = figures[x][y];
+      const figure = figures[x][y];
 
       const deltaAngularSpeed = 0.01 + Math.cos(millis() / 20000 + Math.sin(millis() / 76544) * 0.4 + 1.1)*0.02 + (Math.random()-0.5)*0.01;
 
