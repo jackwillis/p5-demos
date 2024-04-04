@@ -6,9 +6,10 @@ Available demos:
 
 How to use:
 
-- Download this repository (Code → Download Zip).
+- Download the repository.
+  - On GitHub: \[`<>` Code\] → Download ZIP
 - Extract the ZIP archive.
-- Open any demo file ending in `.html`.
+- Open any demo file ending in `.html` in a web browser.
 
 p5.js is a JavaScript graphics library inspired by Processing, originally Java-based.
 
