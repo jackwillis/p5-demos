@@ -1,16 +1,34 @@
-const spacing = 27;
+const xSpacing = 27;
+const ySpacing = 21;
 const lineLength = 17;
 
-let angles = [];
+/**
+ * @typedef {Object} Figure - A figure in the wind.
+ * @property {number} angle - The angle of the figure, in radians.
+ * @property {number} xOffset - The x offset of the figure, in pixels.
+ * @property {number} yOffset - The y offset of the figure, in pixels.
+ */
+
+/**
+ * @type {Figure[][]}
+ */
+let figures = [];
+
+/** The last alpha (transparency) value used to render a figure. */
+let lastAlpha = 0;
 
 function setup() {
   createCanvas(windowWidth / 8, windowHeight / 8);
   noSmooth();
 
-  for (let i = 0; i < width; i += spacing) {
-    angles[i] = [];
-    for (let j = 0; j < height; j += spacing) {
-      angles[i][j] = 0;
+  for (let x = 0; x < width; x += xSpacing) {
+    figures[x] = [];
+    for (let y = 0; y < height; y += ySpacing) {
+      figures[x][y] = {
+        angle: 0,
+        xOffset: 0,
+        yOffset: 0
+      };
     }
   }
 }
@@ -18,30 +36,43 @@ function setup() {
 function draw() {
   colorMode(HSL, 360, 90, 190);
 
-  if (Math.random() > 0.1) {
-    background(0);
+  if (Math.random() - Math.pow(Math.cos(millis()/2000 - 0.4), 3)*0.7 > 0.1) {
+    background(25);
   }
 
-  strokeWeight(1);
   strokeCap(SQUARE);
 
-  for (let i = 0; i < angles.length; i += spacing) {
-    for (let j = 0; j < angles[i].length; j += spacing) {
+  for (let x = 0; x < figures.length; x += xSpacing) {
+    for (let y = 0; y < figures[x].length; y += ySpacing) {
+      let figure = figures[x][y];
+
+      const deltaAngularSpeed = 0.01 + Math.cos(millis() / 20000 + Math.sin(millis() / 76544) * 0.4 + 1.1)*0.02 + (Math.random()-0.5)*0.01;
+
+      const rjitter = (Math.random() - 0.5) * 1.5 + Math.log(Math.abs(0.02 / deltaAngularSpeed))*Math.sign(deltaAngularSpeed)*2;
+      const thetajitter = (Math.random() - 0.5) * 0.1 + figure.angle;
+      const xjitter = rjitter * Math.cos(figure.angle + thetajitter);
+      const yjitter = rjitter * Math.sin(figure.angle + thetajitter);
+
+      const lengthJitter = (xjitter + yjitter) * 0.2;
+      const strokeWeightJitter = Math.sqrt(Math.abs(xjitter * yjitter));
+      const alphaJitter = Math.abs(xjitter - yjitter) * 0.2;
+
+      const hue = map(x, 0, width, 0, 360);
+      const alpha = (0.5 + alphaJitter) * 0.25 + lastAlpha * 0.75;
+      lastAlpha = alpha;
+
+      strokeWeight(1 + strokeWeightJitter);
+      stroke(hue, 100, 100, alpha);
+
       push();
-
-      const xjitter = (Math.random() - 0.5) * 1.5;
-      const yjitter = (Math.random() - 0.5) * 1.5;
-      translate(i + xjitter, j + (Math.random()-0.5)*1.5);
-      rotate(angles[i][j]);
-
-      const hue = map(i, 0, width, 0, 360);
-      stroke(hue, 100, 100, 3);
-      line(0, 0, lineLength, 0);
+      translate(x + figure.xOffset, y + figure.yOffset);
+      rotate(figure.angle);
+      line(0, 0, lineLength + lengthJitter, 0);
       pop();
 
-      const deltaAngularSpeed = 0.01 + Math.cos(millis() / 20000 + Math.sin(millis() / 76544) * 0.4)*0.02 + (Math.random()-0.5)*0.005;
-
-      angles[i][j] += deltaAngularSpeed;
+      figure.angle += deltaAngularSpeed;
+      figure.xOffset += (xjitter * 0.005);
+      figure.yOffset += (yjitter * 0.005);
     }
   }
 }
